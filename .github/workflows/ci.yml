@@ -37,15 +37,21 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Check if Dockerfile exists
+      - name: Find Dockerfile
         run: |
-          if [ ! -f Dockerfile ]; then
-            echo "❌ ERROR: Dockerfile not found in root directory!"
+          if [ -f Dockerfile ]; then
+            echo "Dockerfile found in root directory."
+            echo "DOCKER_PATH=." >> $GITHUB_ENV
+          elif [ -f DocumentProcessorApi/Dockerfile ]; then
+            echo "Dockerfile found in DocumentProcessorApi/ directory."
+            echo "DOCKER_PATH=DocumentProcessorApi" >> $GITHUB_ENV
+          else
+            echo "❌ ERROR: Dockerfile not found!"
             exit 1
           fi
 
       - name: Build Docker image
-        run: docker build -t documentprocessor-api .
+        run: docker build -t documentprocessor-api $DOCKER_PATH
 
       - name: Run application in Docker
         run: |
