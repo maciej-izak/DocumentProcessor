@@ -38,7 +38,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Install Hurl
-        run: curl -sS https://hurl.dev/install.sh | bash
+        run: sudo apt update && sudo apt install -y hurl
 
       - name: Run application in Docker
         run: |
