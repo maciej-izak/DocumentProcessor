@@ -37,6 +37,17 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
+      - name: Install JetBrains HTTP Client CLI (ijhttp)
+        run: |
+          curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
+          unzip ijhttp.zip
+          chmod +x ijhttp/ijhttp
+          sudo mv ijhttp/ijhttp /usr/local/bin/ijhttp
+          echo "IJHTTP installed successfully"
+
+      - name: Verify ijhttp installation
+        run: ijhttp --version
+
       - name: Find Dockerfile
         run: |
           DOCKER_FILE_PATH=$(find . -name "Dockerfile" | head -n 1)
