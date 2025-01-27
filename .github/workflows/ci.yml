@@ -41,8 +41,8 @@ jobs:
         run: |
           curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
           unzip ijhttp.zip
-          chmod +x ijhttp/ijhttp/ijhttp
-          mv ijhttp/ijhttp/ijhttp /usr/local/bin/ijhttp
+          chmod +x ijhttp/ijhttp
+          mv ijhttp/ijhttp /usr/local/bin/ijhttp
 
       - name: Run application in Docker
         run: |
