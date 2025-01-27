@@ -73,24 +73,15 @@ jobs:
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
-            alpine \
-            ls -lah /workdir
-
-      - name: Debug Mounted Files in JetBrains HTTP Client
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
-            jetbrains/intellij-http-client \
-            ls -lah /workdir
+            alpine sh -c "ls -lah /workdir"
 
       - name: Run HTTP tests using JetBrains HTTP Client CLI in Docker
         run: |
           docker run --rm \
             --network="host" \
             -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
-            -w /workdir \
             jetbrains/intellij-http-client \
-            run DocumentProcessorApi.http
+            run /workdir/DocumentProcessorApi.http
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
