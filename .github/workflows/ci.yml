@@ -60,8 +60,11 @@ jobs:
           fi
 
       - name: Run application in Docker
-        run: | 
-          docker run -d -p 5150:5150 -p 5001:5001 --name documentprocessor-api documentprocessor-api
+        run: |
+          docker run -d -p 5150:5150 \
+            --name documentprocessor-api \
+            -e ASPNETCORE_URLS="http://+:5150" \
+            documentprocessor-api    
 
       - name: Wait for API to start
         run: sleep 10
