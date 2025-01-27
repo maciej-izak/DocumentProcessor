@@ -69,11 +69,11 @@ jobs:
       - name: Debug repository structure
         run: ls -lah ${{ github.workspace }}/DocumentProcessorApi
 
-      - name: Debug Docker Mount
+      - name: Debug Docker Mount using Alpine
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
-            jetbrains/intellij-http-client \
+            alpine \
             ls -lah /workdir
 
       - name: Run HTTP tests using JetBrains HTTP Client CLI in Docker
