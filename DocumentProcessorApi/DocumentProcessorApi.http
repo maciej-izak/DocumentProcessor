@@ -1,0 +1,168 @@
+@DocumentProcessorApi_HostAddress = http://localhost:5150
+# Base64(vs:rekrutacja)
+@BasicAuth = Basic dnM6cmVrcnV0YWNqYQ==
+# Base64(wronguser:wrongpassword)
+@WrongAuth = Basic d3Jvbmd1c2VyOndyb25ncGFzc3dvcmQ=
+@Boundary = boundary123
+
+### 🔄 Health Check
+GET {{DocumentProcessorApi_HostAddress}}/health
+
+> {%
+    client.test(`Expected status code 200`, () => {
+        client.assert(response.status === 200, `Received code: ${response.status}`);
+    });
+%}
+
+### 🔐 Test 1: Invalid login
+POST {{DocumentProcessorApi_HostAddress}}/api/test/1
+Authorization: {{WrongAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="testfile.PUR"
+Content-Type: text/plain
+
+H,5308,02,00130,29-01-2015,5222,10140,KOL S.A.,20150128099911,28-01-2015,-34.37,-2.75,-37.12,0.00,0.00,0.00,
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 401`, () => {
+        client.assert(response.status === 401, `Received code: ${response.status}`);
+    });
+%}
+
+### ✅ Test 2: Correct login and valid file
+POST {{DocumentProcessorApi_HostAddress}}/api/test/2
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="testfile.PUR"
+Content-Type: text/plain
+
+H,5308,02,00130,29-01-2015,5222,10140,KOL S.A.,20150128099911,28-01-2015,-34.37,-2.75,-37.12,0.00,0.00,0.00,
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+B,25947,AUTO WIAT CLASSIC,-2.000,14.74000,-29.48,-2.36,3.000,14.74000,1.000,14.74000,1117,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 200`, () => {
+        client.assert(response.status === 200, `Received code: ${response.status}`);
+    });
+%}
+
+### ❌ Test 3: Sending an empty file
+POST {{DocumentProcessorApi_HostAddress}}/api/test/2
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="emptyfile.PUR"
+Content-Type: text/plain
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 400`, () => {
+        client.assert(response.status === 400, `Received code: ${response.status}`);
+    });
+%}
+
+### ❌ Test 4: Missing file in the request
+POST {{DocumentProcessorApi_HostAddress}}/api/test/2
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+> {%
+    client.test(`Expected status code 400`, () => {
+        client.assert(response.status === 400, `Received code: ${response.status}`);
+    });
+%}
+
+### ✅ Test 5: File with an invalid header
+POST {{DocumentProcessorApi_HostAddress}}/api/test/2
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="invalid_header.PUR"
+Content-Type: text/plain
+
+H,5308  # Incomplete header
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 400`, () => {
+        client.assert(response.status === 400, `Received code: ${response.status}`);
+    });
+%}
+
+### ✅ Test 6: File with a document containing a single position
+POST {{DocumentProcessorApi_HostAddress}}/api/test/1
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="single_position.PUR"
+Content-Type: text/plain
+
+H,5308,02,00130,29-01-2015,5222,10140,KOL S.A.,20150128099911,28-01-2015,-34.37,-2.75,-37.12,0.00,0.00,0.00,
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 200`, () => {
+        client.assert(response.status === 200, `Received code: ${response.status}`);
+    });
+%}
+
+### ✅ Test 7: File with documents having more than X positions (x=1)
+POST {{DocumentProcessorApi_HostAddress}}/api/test/1
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="multi_position.PUR"
+Content-Type: text/plain
+
+H,5308,02,00130,29-01-2015,5222,10140,KOL S.A.,20150128099911,28-01-2015,-34.37,-2.75,-37.12,0.00,0.00,0.00,
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+B,25947,AUTO WIAT CLASSIC,-2.000,14.74000,-29.48,-2.36,3.000,14.74000,1.000,14.74000,1117,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 200`, () => {
+        client.assert(response.status === 200, `Received code: ${response.status}`);
+    });
+%}
+
+### ✅ Test 8: File with multiple documents (x=2)
+POST {{DocumentProcessorApi_HostAddress}}/api/test/2
+Authorization: {{BasicAuth}}
+Content-Type: multipart/form-data; boundary={{Boundary}}
+
+--{{Boundary}}
+Content-Disposition: form-data; name="file"; filename="multi_docs.PUR"
+Content-Type: text/plain
+
+H,5308,02,00130,29-01-2015,5222,10140,KOL S.A.,20150128099911,28-01-2015,-34.37,-2.75,-37.12,0.00,0.00,0.00,
+B,19556,NASZ DZIENNIK,-3.000,1.63000,-4.89,-0.39,5.000,1.73552,2.000,1.89379,1117,
+B,25947,AUTO WIAT CLASSIC,-2.000,14.74000,-29.48,-2.36,3.000,14.74000,1.000,14.74000,1117,
+H,5309,01,00131,30-01-2015,5233,10200,Another Corp,20150130099912,30-01-2015,50.00,10.00,60.00,0.00,0.00,0.00,
+B,30000,EXAMPLE PRODUCT,2.000,5.00000,10.00,0.80,2.000,5.00000,4.000,5.00000,1118,
+
+--{{Boundary}}--
+
+> {%
+    client.test(`Expected status code 200`, () => {
+        client.assert(response.status === 200, `Received code: ${response.status}`);
+    });
+%}
