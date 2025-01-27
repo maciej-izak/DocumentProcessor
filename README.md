@@ -127,10 +127,6 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 
 This project is licensed under the [MIT License](LICENSE).
 
-## Contact
-
-For any inquiries or support, please contact [maciej.izak@example.com](mailto:maciej.izak@example.com).
-
 ---
 
 **Happy Coding!**
