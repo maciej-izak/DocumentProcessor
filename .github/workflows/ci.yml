@@ -1,0 +1,59 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      documentprocessor-api:
+        image: mcr.microsoft.com/dotnet/aspnet:latest
+        ports:
+          - 5000:5000
+          - 5001:5001
+        options: >-
+          --name documentprocessor-api
+          --env ASPNETCORE_ENVIRONMENT=Development
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Install JetBrains HTTP Client
+        run: dotnet tool install --global JetBrains.Space.HttpClient
+
+      - name: Run application in Docker
+        run: |
+          docker build -t documentprocessor-api .
+          docker run -d -p 5000:5000 -p 5001:5001 --name documentprocessor-api documentprocessor-api
+
+      - name: Wait for API to start
+        run: sleep 10
+
+      - name: Run HTTP tests
+        run: |
+          jb http --target=http://localhost:5000 DocumentProcessorApi.http
+
+      - name: Run xUnit tests
+        run: dotnet test --configuration Release --no-build --logger trx
+
+      - name: Stop Docker container
+        run: docker stop documentprocessor-api
