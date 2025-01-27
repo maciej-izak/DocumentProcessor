@@ -69,15 +69,10 @@ jobs:
       - name: Run HTTP tests using JetBrains HTTP Client CLI in Docker
         run: |
           docker run --rm \
-            -v $(pwd)/DocumentProcessorApi:/app \
-            openjdk:17-bullseye \
-            bash -c "
-              apt-get update && apt-get install -y unzip curl &&
-              curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest &&
-              unzip ijhttp.zip &&
-              chmod +x ijhttp/ijhttp/ijhttp &&
-              ./ijhttp/ijhttp/ijhttp run /app/DocumentProcessorApi.http
-            "
+            --network="host" \
+            -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
+            jetbrains/intellij-http-client \
+            run -D /workdir/DocumentProcessorApi.http
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
