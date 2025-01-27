@@ -70,7 +70,7 @@ jobs:
         run: |
           docker run --rm \
             -v $(pwd)/DocumentProcessorApi:/app \
-            openjdk:17 \
+            openjdk:17-bullseye \
             bash -c "
               apt-get update && apt-get install -y unzip curl &&
               curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest &&
