@@ -37,16 +37,18 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Download HTTP Client CLI (ijhttp)
+      - name: Check if Dockerfile exists
         run: |
-          curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
-          unzip ijhttp.zip
-          chmod +x ijhttp/ijhttp
-          mv ijhttp/ijhttp /usr/local/bin/ijhttp
+          if [ ! -f Dockerfile ]; then
+            echo "❌ ERROR: Dockerfile not found in root directory!"
+            exit 1
+          fi
+
+      - name: Build Docker image
+        run: docker build -t documentprocessor-api .
 
       - name: Run application in Docker
         run: |
-          docker build -t documentprocessor-api .
           docker run -d -p 5000:5000 -p 5001:5001 --name documentprocessor-api documentprocessor-api
 
       - name: Wait for API to start
