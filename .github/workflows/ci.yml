@@ -40,8 +40,9 @@ jobs:
       - name: Download HTTP Client CLI (ijhttp)
         run: |
           curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
-          unzip ijhttp.zip -d ijhttp
-          chmod +x ijhttp/bin/ijhttp
+          unzip ijhttp.zip
+          chmod +x ijhttp/ijhttp/ijhttp
+          mv ijhttp/ijhttp/ijhttp /usr/local/bin/ijhttp
 
       - name: Run application in Docker
         run: |
@@ -52,7 +53,7 @@ jobs:
         run: sleep 10
 
       - name: Run HTTP tests using JetBrains HTTP Client CLI
-        run: ./ijhttp/bin/ijhttp run DocumentProcessorApi/DocumentProcessorApi.http
+        run: ijhttp run DocumentProcessorApi/DocumentProcessorApi.http
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
