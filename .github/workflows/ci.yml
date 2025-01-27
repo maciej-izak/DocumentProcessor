@@ -37,26 +37,6 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Install Java (Required for ijhttp)
-        run: sudo apt update && sudo apt install -y openjdk-17-jdk
-
-      - name: Set JAVA_HOME
-        run: echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
-
-      - name: Install JetBrains HTTP Client CLI (ijhttp)
-        run: |
-          curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
-          unzip ijhttp.zip -d ijhttp
-          chmod +x ijhttp/ijhttp
-          echo "IJHTTP_PATH=$(pwd)/ijhttp" >> $GITHUB_ENV
-          echo "export PATH=$(pwd)/ijhttp:\$PATH" >> ~/.bashrc
-          echo "IJHTTP installed successfully"
-
-      - name: Verify ijhttp installation
-        run: |
-          source ~/.bashrc
-          "$IJHTTP_PATH/ijhttp" --version
-
       - name: Find Dockerfile
         run: |
           DOCKER_FILE_PATH=$(find . -name "Dockerfile" | head -n 1)
@@ -86,10 +66,18 @@ jobs:
       - name: Wait for API to start
         run: sleep 10
 
-      - name: Run HTTP tests using JetBrains HTTP Client CLI
+      - name: Run HTTP tests using JetBrains HTTP Client CLI in Docker
         run: |
-          source ~/.bashrc
-          "$IJHTTP_PATH/ijhttp" run DocumentProcessorApi/DocumentProcessorApi.http
+          docker run --rm \
+            -v $(pwd)/DocumentProcessorApi:/app \
+            openjdk:17 \
+            bash -c "
+              apt-get update && apt-get install -y unzip curl &&
+              curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest &&
+              unzip ijhttp.zip -d ijhttp &&
+              chmod +x ijhttp/ijhttp &&
+              ./ijhttp/ijhttp run /app/DocumentProcessorApi.http
+            "
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
