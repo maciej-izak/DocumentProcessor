@@ -51,6 +51,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t documentprocessor-api -f $DOCKER_PATH/Dockerfile $DOCKER_PATH
 
+      - name: Remove existing container (if exists)
+        run: |
+          if [ "$(docker ps -aq -f name=documentprocessor-api)" ]; then
+            echo "Removing existing container..."
+            docker stop documentprocessor-api || true
+            docker rm documentprocessor-api || true
+          fi
+
       - name: Run application in Docker
         run: |
           docker run -d -p 5000:5000 -p 5001:5001 --name documentprocessor-api documentprocessor-api
@@ -64,5 +72,7 @@ jobs:
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
 
-      - name: Stop Docker container
-        run: docker stop documentprocessor-api
+      - name: Stop and remove Docker container
+        run: |
+          docker stop documentprocessor-api || true
+          docker rm documentprocessor-api || true
