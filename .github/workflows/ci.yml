@@ -82,7 +82,7 @@ jobs:
             --network="host" \
             -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
             jetbrains/intellij-http-client \
-            run /workdir/DocumentProcessorApi.http
+            run "/workdir/DocumentProcessorApi.http"
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
