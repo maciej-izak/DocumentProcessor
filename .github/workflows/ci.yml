@@ -39,16 +39,14 @@ jobs:
 
       - name: Find Dockerfile
         run: |
-          if [ -f Dockerfile ]; then
-            echo "Dockerfile found in root directory."
-            echo "DOCKER_PATH=." >> $GITHUB_ENV
-          elif [ -f DocumentProcessorApi/Dockerfile ]; then
-            echo "Dockerfile found in DocumentProcessorApi/ directory."
-            echo "DOCKER_PATH=DocumentProcessorApi" >> $GITHUB_ENV
-          else
-            echo "❌ ERROR: Dockerfile not found!"
+          DOCKER_FILE_PATH=$(find . -name "Dockerfile" | head -n 1)
+          if [ -z "$DOCKER_FILE_PATH" ]; then
+            echo "❌ ERROR: Dockerfile not found in the repository!"
             exit 1
           fi
+          DOCKER_DIR=$(dirname "$DOCKER_FILE_PATH")
+          echo "Dockerfile found in: $DOCKER_DIR"
+          echo "DOCKER_PATH=$DOCKER_DIR" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: docker build -t documentprocessor-api $DOCKER_PATH
