@@ -37,8 +37,8 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Install JetBrains HTTP Client
-        run: dotnet tool install --global JetBrains.Space.HttpClient
+      - name: Install Hurl
+        run: curl -sS https://hurl.dev/install.sh | bash
 
       - name: Run application in Docker
         run: |
@@ -48,9 +48,8 @@ jobs:
       - name: Wait for API to start
         run: sleep 10
 
-      - name: Run HTTP tests
-        run: |
-          jb http --target=http://localhost:5000 DocumentProcessorApi.http
+      - name: Run HTTP tests using Hurl
+        run: hurl DocumentProcessorApi/DocumentProcessorApi.http --variable base_url=http://localhost:5000
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
