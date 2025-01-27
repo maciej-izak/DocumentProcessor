@@ -37,8 +37,11 @@ jobs:
       - name: Build solution
         run: dotnet build --configuration Release --no-restore
 
-      - name: Install Hurl
-        run: sudo apt update && sudo apt install -y hurl
+      - name: Download HTTP Client CLI (ijhttp)
+        run: |
+          curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest
+          unzip ijhttp.zip -d ijhttp
+          chmod +x ijhttp/bin/ijhttp
 
       - name: Run application in Docker
         run: |
@@ -48,8 +51,8 @@ jobs:
       - name: Wait for API to start
         run: sleep 10
 
-      - name: Run HTTP tests using Hurl
-        run: hurl DocumentProcessorApi/DocumentProcessorApi.http --variable base_url=http://localhost:5000
+      - name: Run HTTP tests using JetBrains HTTP Client CLI
+        run: ./ijhttp/bin/ijhttp run DocumentProcessorApi/DocumentProcessorApi.http
 
       - name: Run xUnit tests
         run: dotnet test --configuration Release --no-build --logger trx
