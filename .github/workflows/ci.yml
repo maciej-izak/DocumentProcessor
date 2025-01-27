@@ -49,7 +49,7 @@ jobs:
           echo "DOCKER_PATH=$DOCKER_DIR" >> $GITHUB_ENV
 
       - name: Build Docker image
-        run: docker build -t documentprocessor-api $DOCKER_PATH
+        run: docker build -t documentprocessor-api -f $DOCKER_PATH/Dockerfile $DOCKER_PATH
 
       - name: Run application in Docker
         run: |
