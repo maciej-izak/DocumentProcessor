@@ -54,12 +54,14 @@ jobs:
       - name: Remove existing container (if exists)
         run: |
           if [ "$(docker ps -aq -f name=documentprocessor-api)" ]; then
+            echo "Removing existing container..."
             docker stop documentprocessor-api || true
             docker rm documentprocessor-api || true
           fi
 
       - name: Run application in Docker
-        run: docker run -d -p 5150:5150 -p 5001:5001 --name documentprocessor-api documentprocessor-api
+        run: | 
+          docker run -d -p 5150:5150 -p 5001:5001 --name documentprocessor-api documentprocessor-api
 
       - name: Wait for API to start
         run: sleep 10
@@ -79,7 +81,6 @@ jobs:
             --network="host" \
             -v ${{ github.workspace }}/DocumentProcessorApi:/workdir \
             jetbrains/intellij-http-client \
-            --env DocumentProcessorApi_HostAddress=http://localhost:5150 \
             /workdir/DocumentProcessorApi.http
 
       - name: Run xUnit tests
