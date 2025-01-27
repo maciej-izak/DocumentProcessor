@@ -74,9 +74,9 @@ jobs:
             bash -c "
               apt-get update && apt-get install -y unzip curl &&
               curl -L -o ijhttp.zip https://jb.gg/ijhttp/latest &&
-              unzip ijhttp.zip -d ijhttp &&
-              chmod +x ijhttp/ijhttp &&
-              ./ijhttp/ijhttp run /app/DocumentProcessorApi.http
+              unzip ijhttp.zip &&
+              chmod +x ijhttp/ijhttp/ijhttp &&
+              ./ijhttp/ijhttp/ijhttp run /app/DocumentProcessorApi.http
             "
 
       - name: Run xUnit tests
